@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/node_modules
+/.vs/Fire-IceBE/FileContentIndex
+/.vs/slnx.sqlite
+/.vs/Fire-IceBE/v17
+/.vs/Fire-IceBE/config
