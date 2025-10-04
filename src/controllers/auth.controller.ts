@@ -1,16 +1,11 @@
-﻿import { Router, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { users } from '../data/users';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import cookieParser from 'cookie-parser';
-import * as authController from '../controllers/auth.controller';
 
-const router = Router();
 const SECRET = 'supersecretkey';
 
-router.use(cookieParser());
-
-router.post('/register', async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response) => {
     const { username, password } = req.body;
 
     if (!username || !password)
@@ -24,16 +19,22 @@ router.post('/register', async (req: Request, res: Response) => {
     users.push(newUser);
 
     res.status(201).json({ message: 'User registered', user: { id: newUser.id, username } });
-});
+};
 
-router.post('/login', async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const user = users.find(u => u.username === username);
 
-    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) return res.status(401).json({
+        message: 'Invalid credentials',
+        success: false
+    });
 
     const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!valid) return res.status(401).json({
+        message: 'Invalid credentials',
+        success: false
+    });
 
     const token = jwt.sign({ id: user.id, username: user.username }, SECRET, { expiresIn: '1h' });
 
@@ -44,31 +45,27 @@ router.post('/login', async (req: Request, res: Response) => {
         maxAge: 3600000
     });
 
-    res.json({ message: 'Login successful', username: user.username });
-});
+    res.json({
+        message: 'Login successful',
+        username: user.username,
+        success: true
+    });
+};
 
-router.get('/session', (req: Request, res: Response) => {
+export const checkSession = (req: Request, res: Response) => {
     const token = req.cookies.token;
 
-    if (!token)
-        return res.status(401).json({ isAuthenticated: false, message: 'No session' });
+    if (!token) return res.status(401).json({ isAuthenticated: false });
 
     try {
         const decoded = jwt.verify(token, SECRET);
         res.json({ isAuthenticated: true, user: decoded });
     } catch {
-        res.status(401).json({ isAuthenticated: false, message: 'Invalid token' });
+        res.status(401).json({ isAuthenticated: false });
     }
-});
+};
 
-router.post('/logout', (req: Request, res: Response) => {
+export const logout = (req: Request, res: Response) => {
     res.clearCookie('token');
     res.json({ message: 'Logged out' });
-});
-
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-router.get('/session', authController.checkSession);
-router.post('/logout', authController.logout);
-
-export default router;
+};
