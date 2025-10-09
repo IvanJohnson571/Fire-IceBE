@@ -75,9 +75,4 @@ router.post('/logout', (req: Request, res: Response) => {
     res.json({ message: 'Logged out' });
 });
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-router.get('/session', authController.checkSession);
-router.post('/logout', authController.logout);
-
 export default router;
