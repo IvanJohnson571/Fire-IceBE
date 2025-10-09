@@ -11,6 +11,7 @@ const SECRET = 'supersecretkey';
 router.use(cookieParser());
 
 router.post('/register', async (req: Request, res: Response) => {
+
     const { username, password } = req.body;
 
     if (!username || !password)
@@ -24,15 +25,18 @@ router.post('/register', async (req: Request, res: Response) => {
     users.push(newUser);
 
     res.status(201).json({ message: 'User registered', user: { id: newUser.id, username } });
+
 });
 
 router.post('/login', async (req: Request, res: Response) => {
+
     const { username, password } = req.body;
     const user = users.find(u => u.username === username);
 
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
     const valid = await bcrypt.compare(password, user.passwordHash);
+
     if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, username: user.username }, SECRET, { expiresIn: '1h' });
@@ -45,9 +49,11 @@ router.post('/login', async (req: Request, res: Response) => {
     });
 
     res.json({ message: 'Login successful', username: user.username });
+
 });
 
 router.get('/session', (req: Request, res: Response) => {
+
     const token = req.cookies.token;
 
     if (!token)
@@ -56,9 +62,12 @@ router.get('/session', (req: Request, res: Response) => {
     try {
         const decoded = jwt.verify(token, SECRET);
         res.json({ isAuthenticated: true, user: decoded });
+
     } catch {
         res.status(401).json({ isAuthenticated: false, message: 'Invalid token' });
+
     }
+
 });
 
 router.post('/logout', (req: Request, res: Response) => {

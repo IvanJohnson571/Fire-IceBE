@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 const SECRET = 'supersecretkey';
 
 export const register = async (req: Request, res: Response) => {
+
     const { username, password } = req.body;
 
     if (!username || !password)
@@ -19,9 +20,11 @@ export const register = async (req: Request, res: Response) => {
     users.push(newUser);
 
     res.status(201).json({ message: 'User registered', user: { id: newUser.id, username } });
+
 };
 
 export const login = async (req: Request, res: Response) => {
+
     const { username, password } = req.body;
     const user = users.find(u => u.username === username);
 
@@ -31,6 +34,7 @@ export const login = async (req: Request, res: Response) => {
     });
 
     const valid = await bcrypt.compare(password, user.passwordHash);
+
     if (!valid) return res.status(401).json({
         message: 'Invalid credentials',
         success: false
@@ -50,9 +54,11 @@ export const login = async (req: Request, res: Response) => {
         username: user.username,
         success: true
     });
+
 };
 
 export const checkSession = (req: Request, res: Response) => {
+
     const token = req.cookies.token;
 
     if (!token) return res.status(401).json({ isAuthenticated: false });
@@ -60,9 +66,12 @@ export const checkSession = (req: Request, res: Response) => {
     try {
         const decoded = jwt.verify(token, SECRET);
         res.json({ isAuthenticated: true, user: decoded });
+
     } catch {
         res.status(401).json({ isAuthenticated: false });
+
     }
+
 };
 
 export const logout = (req: Request, res: Response) => {
